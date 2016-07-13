@@ -1,12 +1,16 @@
 package org.srikant.contactsharing.contactsharing;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.auth.AWSCredentials;
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.auth.PropertiesFileCredentialsProvider;
 import com.amazonaws.auth.profile.ProfileCredentialsProvider;
+import com.amazonaws.auth.profile.ProfilesConfigFile;
 import com.amazonaws.regions.Region;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
@@ -20,7 +24,7 @@ public class InsertUser {
 	 
 	 //Intial Configuration
 	 private static void init() throws Exception {
-	        
+		 	
 	        AWSCredentials credentials = null;
 	        try {
 	            credentials = new ProfileCredentialsProvider("default").getCredentials();

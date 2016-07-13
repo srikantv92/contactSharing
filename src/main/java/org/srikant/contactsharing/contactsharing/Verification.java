@@ -1,5 +1,6 @@
 package org.srikant.contactsharing.contactsharing;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -8,6 +9,8 @@ import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.profile.ProfileCredentialsProvider;
+import com.amazonaws.auth.profile.ProfilesConfigFile;
+import com.amazonaws.auth.profile.internal.ProfilesConfigFileLoader;
 import com.amazonaws.regions.Region;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
@@ -25,7 +28,9 @@ public class Verification {
 	        
 	        AWSCredentials credentials = null;
 	        try {
-	            credentials = new ProfileCredentialsProvider("default").getCredentials();
+	        	File f= new File("credentials");
+	        	ProfilesConfigFile p= new ProfilesConfigFile(f);
+	            credentials = new ProfileCredentialsProvider(p,"Admin").getCredentials();
 	        } catch (Exception e) {
 	            throw new AmazonClientException(
 	                    "Cannot load the credentials from the credential profiles file. " +
