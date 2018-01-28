@@ -12,19 +12,16 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 
-
 @Path("/register")
 public class UserRegistration {
 
-    private InsertUser insert =  new InsertUser();
-    @POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.TEXT_PLAIN)
-    public String newUser(NewUser newUser) throws Exception {
-    	String insertionStatus = insert.insertUser(newUser);
-    	return insertionStatus;	
-    }
-    
-   
-    
+	private InsertUser insert = new InsertUser();
+
+	@POST
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.TEXT_PLAIN)
+	public String newUser(NewUser newUser) throws Exception {
+		String insertionStatus = insert.insertUser(newUser);
+		return insertionStatus;
+	}
 }

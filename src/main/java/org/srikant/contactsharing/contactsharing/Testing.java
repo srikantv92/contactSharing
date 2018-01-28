@@ -1,6 +1,7 @@
 package org.srikant.contactsharing.contactsharing;
 
-import java.io.File;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,27 +10,26 @@ import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.profile.ProfileCredentialsProvider;
-import com.amazonaws.auth.profile.ProfilesConfigFile;
-import com.amazonaws.auth.profile.internal.ProfilesConfigFileLoader;
 import com.amazonaws.regions.Region;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.amazonaws.services.dynamodbv2.model.ComparisonOperator;
 import com.amazonaws.services.dynamodbv2.model.Condition;
+import com.amazonaws.services.dynamodbv2.model.PutItemRequest;
+import com.amazonaws.services.dynamodbv2.model.PutItemResult;
 import com.amazonaws.services.dynamodbv2.model.ScanRequest;
 import com.amazonaws.services.dynamodbv2.model.ScanResult;
 
-public class Verification {
+public class Testing {
 
 	static AmazonDynamoDBClient dynamoDB;
 
+	// Intial Configuration
 	private static void init() throws Exception {
 		AWSCredentials credentials = null;
 		try {
-			File f = new File("credentials");
-			ProfilesConfigFile p = new ProfilesConfigFile(f);
-			credentials = new ProfileCredentialsProvider(p, "Admin").getCredentials();
+			credentials = new ProfileCredentialsProvider("default").getCredentials();
 		} catch (Exception e) {
 			throw new AmazonClientException("Cannot load the credentials from the credential profiles file. "
 					+ "Please make sure that your credentials file is at the correct "
@@ -40,27 +40,17 @@ public class Verification {
 		dynamoDB.setRegion(singapore);
 	}
 
-	public String verify(VerifyInfo userInfo) throws Exception {
+	public static void main(String[] args) throws Exception {
+		// TODO Auto-generated method stub
 		init();
-
 		try {
 			HashMap<String, Condition> scanFilter = new HashMap<String, Condition>();
-			Condition condition = new Condition().withComparisonOperator(ComparisonOperator.EQ.toString())
-					.withAttributeValueList(new AttributeValue().withN(userInfo.getId_QrCode()));
+			Condition condition = new Condition().withComparisonOperator(ComparisonOperator.GT.toString())
+					.withAttributeValueList(new AttributeValue().withN("1900"));
 			scanFilter.put("Id_QrCode", condition);
 			ScanRequest scanRequest = new ScanRequest("Person").withScanFilter(scanFilter);
 			ScanResult scanResult = dynamoDB.scan(scanRequest);
-			Map<String, AttributeValue> result = scanResult.getItems().get(0);
-			String verifyStatus = "";
-			System.out.println(verifyEmail(userInfo, result) + " " + verifyName(userInfo, result) + " "
-					+ verifyPhone(userInfo, result) + " " + verifyQrCode(userInfo, result));
-			if (verifyEmail(userInfo, result) && verifyName(userInfo, result) && verifyPhone(userInfo, result)
-					&& verifyQrCode(userInfo, result)) {
-				verifyStatus = "Success";
-				return verifyStatus;
-			}
-			verifyStatus = "Failed";
-			return verifyStatus;
+			System.out.println("Result: " + scanResult);
 
 		} catch (AmazonServiceException ase) {
 			System.out.println("Caught an AmazonServiceException, which means your request made it "
@@ -76,43 +66,5 @@ public class Verification {
 					+ "such as not being able to access the network.");
 			System.out.println("Error Message: " + ace.getMessage());
 		}
-		return null;
-	}
-
-	private boolean verifyName(VerifyInfo userInfo, Map<String, AttributeValue> result) {
-		String actualName = userInfo.getName().toLowerCase().replace(" ", "");
-		String expectedName = result.get("name").getS().toLowerCase().replace(" ", "");
-		if (actualName.equals(expectedName)) {
-			return true;
-		}
-		return false;
-	}
-
-	private boolean verifyQrCode(VerifyInfo userInfo, Map<String, AttributeValue> result) {
-		String actualCode = userInfo.getId_QrCode();
-		String expectedCode = result.get("Id_QrCode").getN();
-		if (actualCode.equals(expectedCode)) {
-			return true;
-		}
-		return false;
-	}
-
-	private boolean verifyPhone(VerifyInfo userInfo, Map<String, AttributeValue> result) {
-		String actualPhone = userInfo.getPhone();
-		List<String> expectedPhone = result.get("phone").getSS();
-		if (expectedPhone.contains(actualPhone)) {
-			return true;
-		}
-		return false;
-	}
-
-	private boolean verifyEmail(VerifyInfo userInfo, Map<String, AttributeValue> result) {
-		String actualEmail = userInfo.getEmail().trim();
-		List<String> expectedEmail = result.get("email").getSS();
-		if (expectedEmail.contains(actualEmail)) {
-			return true;
-		}
-
-		return false;
 	}
 }
